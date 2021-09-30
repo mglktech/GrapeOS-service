@@ -16,7 +16,6 @@ require("./bin/highlife-dragtimes");
 require("./config/cron.js");
 require("./config/newdbconfig").setup();
 let app = express();
-
 // DEFAULT CONFIGS
 // app.use(express.static(path.join(__dirname, "public"))); // PUBLIC STATIC DIRECTORY
 
