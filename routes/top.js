@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const shortcuts = require("../models/shortcut-model");
 const files = require("../models/file-model");
-
 router.get("/", (req, res) => res.json({ ok: true }));
 // router.get("/welcome", (req, res) => {
 // 	res.render("pages/welcome");
