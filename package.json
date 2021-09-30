@@ -1,19 +1,62 @@
 {
-  "name": "grapeos-service",
-  "version": "1.0.0",
-  "description": "",
+  "name": "grape-os",
+  "version": "0.3.0",
+  "description": "a Web service in the style of an operating system",
+  "engines": {
+    "node": "14.x"
+  },
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "connect-mongo": "^4.6.0",
+    "cron": "^1.8.2",
+    "cron-job-manager": "^2.1.4",
+    "crypto": "^1.0.1",
+    "discord-fetch-all": "^3.0.2",
+    "discord.js": "^12.5.3",
+    "dotenv": "^10.0.0",
+    "ejs": "^3.1.5",
+    "emberdyn-logger": "^1.0.15",
+    "express": "^4.15.2",
+    "express-session": "^1.17.2",
+    "fivem": "^2.1.8",
+    "highlight.js": "^10.7.3",
+    "lastfm-node-client": "^2.2.0",
+    "markdown-it": "^12.2.0",
+    "markdown-it-checkbox": "^1.1.0",
+    "markdown-it-include": "^2.0.0",
+    "moment": "^2.29.1",
+    "mongoose": "^5.13.9",
+    "mongoose-fuzzy-searching": "^2.0.2",
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.0",
+    "passport": "^0.4.1",
+    "passport-discord": "^0.1.4",
+    "passport-local": "^1.0.0",
+    "timeago.js": "^4.0.2",
+    "winbox": "^0.2.0"
+  },
+  "devDependencies": {
+    "@unibeautify/beautifier-js-beautify": "^0.4.0",
+    "got": "^11.3.0",
+    "js-beautify": "^1.14.0",
+    "nodemon": "^2.0.13",
+    "tape": "^4.14.0",
+    "unibeautify": "^0.17.1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mglktech/GrapeOS-service.git"
+    "url": "https://github.com/heroku/node-js-getting-started"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/mglktech/GrapeOS-service/issues"
-  },
-  "homepage": "https://github.com/mglktech/GrapeOS-service#readme"
+  "keywords": [
+    "node",
+    "heroku",
+    "express"
+  ],
+  "license": "MIT"
 }

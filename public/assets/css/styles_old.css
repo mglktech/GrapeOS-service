@@ -1,0 +1,120 @@
+body {
+	margin: 0;
+	/* font-family: "Roboto Mono", sans serif; */
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.5;
+	color: #ccc;
+	background: linear-gradient(90deg, rgba(38, 21, 67, 1), rgba(21, 94, 77, 1));
+	-webkit-text-size-adjust: 100%;
+	-webkit-tap-highlight-color: transparent;
+}
+
+a:hover {
+	color: var(--bs-purple);
+}
+
+a {
+	color: #6c757d;
+	text-decoration: none;
+}
+
+.desktop-center {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	z-index: -99;
+}
+
+.sp-brand {
+	font-size: 32px;
+	font-family: "Fira Code", monospace;
+	font-weight: bold;
+	line-height: 22px;
+	color: rgba(204, 204, 204, 0.7);
+}
+
+.sp-subbrand {
+	font-family: "Fira Code", monospace;
+	color: rgb(204, 204, 204, 0.7);
+}
+
+.desktop-icons {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin: 20px;
+	max-width: 20vw;
+}
+
+.div-icon {
+	display: flex;
+	padding: 5%;
+	width: 100px;
+	height: 100px;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	cursor: pointer;
+}
+.div-icon img {
+	width: 50px;
+	height: 50px;
+}
+
+.navbar-bottom {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	position: fixed;
+	bottom: 0;
+	background: rgb(0, 0, 0, 0.5);
+	width: 100%;
+}
+
+.taskbar-timedate {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-left: 15px;
+}
+
+.taskbar-right {
+	display: flex;
+	flex-direction: row;
+	margin-right: 10px;
+}
+
+.taskbar-start {
+	width: 50px;
+	margin: 5px;
+}
+
+img,
+svg {
+	vertical-align: middle;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.login-form {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	transform: translateY(50%);
+}
+
+.form-row {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	min-width: 50%;
+	padding-top: 5px;
+	padding-bottom: 10px;
+}

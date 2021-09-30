@@ -1,0 +1,23 @@
+
+<form id = "myform" class="window-form">
+        <input class="form-control" type="text" name="username" placeholder="Username">
+        <input class="form-control" type="password" name="password" placeholder="Password">
+        <input name="redir" value="/auth/login" hidden>
+        <button type="submit">Log In</button>
+</form>
+<script defer>
+var form = document.querySelector("#myform"),
+submitImput = form.querySelector("input[type='submit']");
+
+
+
+const doSubmit = (e) => {
+        e.preventDefault();
+        var formData = new FormData(form);
+        var event = new CustomEvent('formHandler',{detail:formData});
+        window.parent.document.dispatchEvent(event);
+};
+
+form.addEventListener("submit", doSubmit);
+
+</script>

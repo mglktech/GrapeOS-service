@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>GrapeOS</title>
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Code:400,500,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,500,700">
+    <style>
+        html {
+            height:100%;
+        }
+        body {
+            height:100%;
+            background-color: #212529;
+            
+        }
+        .span-sub {
+            font-size: 15px;
+            line-height: 18px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .role-circle {
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            padding: 0;
+            margin-left: .25rem;
+        }
+        .role {
+            border: 1px solid;
+            border-radius: 50rem;
+            font-size: 12px;
+            padding:.25rem;
+            margin:.25rem;
+            white-space: nowrap
+        }
+        .headroom {
+            height:35px;
+            background:transparent;
+        }
+        .wrapper {
+            
+        }
+        table {
+            display:block;
+            
+            overflow:auto;
+        }
+        
+        ::-webkit-scrollbar {
+            top:35px;
+	        width: 1rem;
+            background-color:#212529;
+        }
+        :-webkit-scrollbar-track {
+	        background-color: #212529;
+        }
+        ::-webkit-scrollbar-thumb {
+	        border-radius: 10px;
+	        background-color: rgba(38, 21, 67, 1);
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+
+
+
+
+
+    </style>
+    <script src="/dist/timeago.min.js"></script>
+</head>
+
+<body>
+    <div class="headroom"></div>
+    <div id="wrapper">
+    </div>
+    
+    <script defer>
+
+        const avTemplate = (id,imgSrc,nickname,username,roles,joined) => {
+            return `<div class="border rounded border-dark shadow d-inline-flex flex-column m-2 p-2" style="background: #2c3134;">
+            <div class="d-flex justify-content-between">
+                <div class="d-inline-flex"><img class="rounded-circle m-1" src="${imgSrc}" width="50px" height="50px">
+                    <div><span class="text-nowrap" style="color: rgb(255,255,255);">${nickname}<br></span><span class="text-nowrap span-sub">${username}<br></span></div>
+                </div>
+                <div class="text-nowrap text-end text-white px-1"><span class="bg-secondary border rounded border-secondary shadow-none px-1 ">${id}</span></div>
+            </div>
+            <div>
+                ${roles}
+            </div>
+            <div class="text-nowrap text-secondary"><span class="px-1">Joined ${joined}</span></div>
+        </div>`
+        }
+        const avTemplate_noDiscord = (id,username,joined) => {
+            return `<div class="border rounded border-dark shadow d-inline-flex flex-column m-2 p-2" style="background: #2c3134;">
+            <div class="d-flex justify-content-between">
+                <div class="d-inline-flex">
+                    <div><span class="text-nowrap span-sub">${username}<br></span></div>
+                </div>
+                <div class="text-nowrap text-end text-white mx-1"><span class="bg-secondary border rounded border-secondary shadow-none px-1 ">${id}</span></div>
+            </div>
+            <div class="text-nowrap text-secondary"><span class="px-1">Joined ${joined}</span></div>
+        </div>`
+        }
+        const badge = (text,color,rounded = true)   => {
+            let hex = `#${parseInt(color).toString(16)}`;
+            if(hex === "#0") {
+                hex = "#000000";
+            }
+            //console.log(hex);
+            if(rounded)
+            {
+                return `<div class="d-inline-flex align-items-center role" style="border-color: ${hex}">
+    <div class="role-circle" style="background: ${hex}"></div><span class="mx-1 text-light">${text}</span>
+</div>`;
+            }
+            return `<span class="badge m-1" style="background-color: ${hex};">${text}</span>`;
+        }
+        function makeBadges(roles,deep=true) {
+            let data = ``;
+            for(let role of roles) {
+                if(!deep && (role.hoist || role.managed || role.mentionable)) {
+                    data += badge(role.name,role.color,true);
+                }
+                if(deep)
+                {
+                    data += badge(role.name,role.color,true);
+                }
+                
+            }
+            return data;
+        }
+        function makePlayer(data)  {
+            if(data.player.discord.nickname === null) {
+                data.player.discord.nickname = data.player.discord.user.username;
+            }
+            let src = "/svg/Discord-Logo-White.svg";
+            if(data.player.discord.user.avatar) {
+                src = `https://cdn.discordapp.com/avatars/${data.player.discord.user.id}/${data.player.discord.user.avatar}.png?size=128`
+            }
+            let badges = makeBadges(data.player.discord.roles);
+            let joined = timeago.format(data.onlineAt);
+            return avTemplate(data.sv_id,src,data.player.discord.nickname,data.player.fiveM.name,badges,joined);
+            
+        }
+        function makePlayer_noDiscord(data) {
+            let id = data.sv_id;
+            let username = data.player.fiveM.name;
+            let joined = timeago.format(data.onlineAt);
+            return avTemplate_noDiscord(id,username,joined);
+        }
+        const row = (data) => {
+            
+            if(data.player.discord.nickname === null) {
+                data.player.discord.nickname = data.player.discord.user.username;
+            }
+            let src = "/svg/Discord-Logo-White.svg";
+            if(data.player.discord.user.avatar) {
+                src = `https://cdn.discordapp.com/avatars/${data.player.discord.user.id}/${data.player.discord.user.avatar}.png?size=128`
+            }
+            let html = `<tr>
+                    <td class="text-center">${data.sv_id}</td>
+                    <td>
+                        <div class="d-inline-flex"><img class="rounded-circle m-1" src="${src}" width="50px">
+                            <div><span class="text-nowrap">${data.player.discord.nickname}</span><br><span
+                                    class="text-nowrap span-sub">${data.player.fiveM.name}</span></div>
+                        </div>
+                    </td>
+                    <td>${makeBadges(data.player.discord.roles)}</td>
+                    <td>
+                        <span class="text-nowrap">${timeago.format(data.onlineAt)}</span> 
+                        </td>
+                </tr>`;
+            return html;
+        }
+        const noDiscord_row = (data) => {
+            let html = `<tr>
+                    <td class="text-center">${data.sv_id}</td>
+                    <td>
+                        <span class="text-nowrap span-sub">${data.player.fiveM.name}</span>
+                    </td>
+                    <td></td>
+                    <td><span class="text-nowrap">${timeago.format(data.onlineAt)}</span></td>
+                </tr>`;
+            return html;
+        }
+        
+
+        async function parseData() {
+            const response = await fetch("/api/playerInfo/highlife");
+            const pData = await response.json();
+            const wrapper = document.getElementById("wrapper");
+            let inner = "";
+            //console.log(pData);
+            for(let p of pData) {
+                if(p.player.discord._dateUpdated === undefined) {
+                    inner += makePlayer_noDiscord(p);
+                    
+                }
+                else {
+                    inner += makePlayer(p);
+                }
+                
+            }
+            wrapper.innerHTML = inner;
+            
+        }
+        parseData();
+        window.setInterval("parseData()", 10000);
+    </script>
+    
+</body>
+
+</html>

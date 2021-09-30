@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+	<title>GrapeOS</title>
+	<link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Code:400,500,700">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,500,700">
+	<link rel="stylesheet" href="/assets/css/styles.css">
+	<link rel="stylesheet" href="/css/winbox.css">
+</head>
+
+<body>
+	<div class="desktop-center"><img src="/assets/img/Emoji.svg" width="100px" height="100px"><span
+			class="sp-subbrand">Powered By</span><span class="sp-brand">&lt;grapeOS/&gt;</span></div>
+	<div class="desktop-icons">
+		<div class="div-icon" id="taskScheduler"><img src="/assets/img/vs_profile.svg"><span>Task Scheduler</span></div>
+		<div class="div-icon" id="iconManager"><img src="/assets/img/vs_profile.svg"><span>Icon Manager</span></div>
+		<div class="d-inline-flex flex-column align-items-center p-2" id="shortcut" style="cursor: pointer;"><i
+			class="fa fa-folder-open shadow" style="font-size: 3rem"></i><span
+			class="text-nowrap shadow">Highlife Roleplay</span></div>
+	</div>
+	<div class="navbar-bottom"><img class="taskbar-start" src="/assets/img/Emoji%20(1).svg">
+		<div class="taskbar-right align-items-center">
+			<div id="spotify"><img id="spotify" src="/assets/img/akar-icons_spotify-fill.svg"></div><a
+				href="/auth/logout" id="login"><img src="/assets/img/vs_profile.svg"></a>
+			<div class="taskbar-timedate"><span id="time"></span><span id="date"></span></div>
+		</div>
+	</div>
+	<script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+	<script src="/js/winbox.bundle.js"></script>
+	<script>
+		
+		const taskScheduler = document.querySelector("#taskScheduler");
+		const iconManager = document.querySelector("#iconManager");
+		const spotify = document.querySelector("#spotify");
+		const opts = {
+			spotify: {
+				sm: {
+					title: "Spotify - Listen In",
+					width: "100%",
+					height: "200px",
+					x: "bottom",
+					bottom: 50,
+					y: "right",
+					url: "/api/spotify/widget",
+					//url:"/api/public/fm/home"
+				},
+				lg: {
+					title: "Spotify - Listen In",
+					width: "450px",
+					height: "200px",
+					x: "bottom",
+					bottom: 50,
+					y: "right",
+					url: "/api/spotify/widget",
+					//url:"/api/public/fm/home"
+				},
+			},
+			taskScheduler: {
+				title: "Task Scheduler",
+				width: "400px",
+				height: "520px",
+				x: "center",
+				url: "/bin/tasks/view",
+			},
+			iconManager: {
+				title: "Icon Manager",
+				width: "400px",
+				height: "520px",
+				x: "center",
+				url: "/bin/icons/view",
+			},
+		};
+		
+		spotify.addEventListener("click", () => {
+			if (window.screen.width < window.screen.height && window.screen.width < 450) {
+				const box = winBox(opts.spotify.sm);
+			} else {
+				const box = winBox(opts.spotify.lg);
+			}
+		});
+		taskScheduler.addEventListener("click", () => {
+			const box = winBox(opts.taskScheduler);
+		});
+		iconManager.addEventListener("click", () => {
+			const box = winBox(opts.iconManager);
+		});
+		const winBox = (opts) => { // Code to apply some default options for smaller screen sizes
+			const defaultOpts = {
+				onfocus: function () {
+					if (window.screen.width < this.width) {
+						this.maximize(true);
+					}
+				},
+				onblur: function () {},
+			};
+			let allOpts = Object.assign({}, opts, defaultOpts);
+			//console.log(allOpts);
+			return new WinBox(allOpts);
+		};
+		const icon = document.querySelector("#shortcut");
+        icon.addEventListener("click", () => {
+            const box = winBox({
+                title: "HighLife Roleplay",
+                width: "400px",
+                height: "500px",
+                url: "/apps/folder",
+            });
+        });
+	</script>
+</body>
+
+</html>

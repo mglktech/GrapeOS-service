@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%-include("../../partials/head")%>
+
+
+<body>
+    <div class="card min-vh-100">
+        <div class="card-header">
+            <h5 class="text-secondary mb-0">Scheduled Tasks</h5>
+        </div>
+        <div class="card-body" id="document-body">
+            <% tasks.forEach(task => {%>
+            <div class="d-flex flex-row justify-content-between py-1" id="scheduledTask">
+                <div class="d-flex align-items-center text-dark fw-bold"><span><%=task.name%></span></div>
+                <div class="btn-group btn-group-lg" role="group">
+                    <a class="btn btn-outline-secondary" href="/bin/tasks/info/<%=task._id%>">
+                        <i class="fa fa-info-circle px-3"></i></a>
+                    <% if(task.enabled) {%>
+                    <a class="btn btn-success" type="button" href="/bin/tasks/toggle/<%=task._id%>"><i
+                            class="fa fa-power-off"></i></a>
+                    <%} if(!task.enabled) {%>
+                    <a class="btn btn-danger" type="button" href="/bin/tasks/toggle/<%=task._id%>"><i
+                            class="fa fa-power-off"></i></a>
+                    <%}%>
+                </div>
+            </div>
+            <%});%>
+
+                </div>
+                <hr>
+                <div class="d-flex justify-content-end"><a class="btn btn-primary btn-lg m-2 text-light" role="button"
+                        href="/bin/tasks/add">+</a></div>
+            </div>
+            <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+            <script>
+
+            </script>
+</body>
+
+</html>
+
+</html>

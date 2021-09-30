@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <%-include("../../partials/head")%>
+
+<body>
+    <div class="card textlight bg-dark text-light min-vh-100">
+        <div class="card-header">
+            <h5 class="mb-0">Folders</h5>
+        </div>
+        <div class="card-body p-1">
+            <div class="container-fluid">
+                <% folders.forEach(folder => {%>
+                <div class="row">
+                    <div class="col d-flex justify-content-between align-items-start">
+                        
+                        <div class="text-truncate d-flex">
+                        <i class="<%=folder.icon.data.iconTypeData%>" style="font-size: 50px;">
+                        </i>
+                        <div>
+                            <h5><%=folder.name%></h5>
+                            
+                        </div>
+                            
+                        </div>
+                        
+                        <div class="d-flex">
+                        <%if(folder.data.requireAdmin) {%>
+                            <span>Admin</span>
+                            <%} if(!folder.data.requireAuth) {%>
+                            <span>Public</span>
+                            <%}%>
+                        <form method="post" action="/bin/files/remove/<%=folder._id%>">
+                            <button class="btn btn-danger btn-lg m-2 text-light" type="submit"><i class="fa fa-trash-o"></i></button>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+                <%});%>
+            </div>
+            <div class="d-flex flex-row justify-content-center"><a class="btn btn-info btn-lg m-2" role="button" id="btn-add-icon" href="/bin/folders/add"><i class="fa fa-plus"></i></a></div>
+        </div>
+    </div>
+    <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>

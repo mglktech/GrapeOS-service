@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%-include("../../partials/head")%>
+
+<body>
+    <div class="card textlight bg-dark text-light min-vh-100">
+        <div class="card-header">
+            <h5 class="mb-0">Add Server</h5>
+        </div>
+        <div class="card-body">
+            <div class="py-4">
+                <form id="fetch-cfx">
+                    <div class="input-group"><span class="input-group-text">cfx.re/join/</span><input
+                            class="form-control" id="cfx-input" type="text"><button class="btn btn-primary"
+                            type="submit"><i class="fa fa-angle-right"></i></button></div>
+                </form>
+                <label id="errLabel" class="form-label text-danger"></label>
+            </div>
+            <div class="border rounded-0 border-success visually-hidden" id="svinfo">
+                <div>
+                    <img class="img-fluid p-0" id="img-splash-banner" src="" width="100%">
+                </div>
+                <div class="p-2" style="background: #000000;">
+                    <div class="d-flex flex-row align-items-center">
+                        <h1 class="text-light m-0" id="sv-title">...</h1>
+                    </div>
+                    <div>
+                        <p id="sv-desc">...</p>
+                        <div class="d-flex flex-column">
+                            <label>Vars</label>
+                            <pre id="sv-vars" class=" bg-dark text-light p-2"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-center py-2">
+                <div class="d-inline-flex flex-column align-items-start">
+                    <div class="form-check"><input type="checkbox" class="form-check-input" id="tracked"
+                            value="" /><label class="form-check-label">Start Tracking</label></div>
+                    <div class="form-check"><input type="checkbox" class="form-check-input" id="featured" /><label
+                            class="form-check-label" for="formCheck-2">Make Public</label></div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between py-4">
+                <a class="btn btn-secondary btn-lg" href="/bin/fiveM/server/view/all/html" type="button">
+                    <i class="fa fa-arrow-left"></i>
+                </a>
+                <form method="POST" id="post-form" action="/bin/fiveM/server/add">
+                    <input type="text" hidden id="url" name="url">
+                    <input type="text" hidden id="svData" name="svData">
+                    <button class="btn btn-success btn-lg disabled" type="submit" id="submit-ip">
+                        <i class="fa fa-check"></i>
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+    <script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+
+    <script defer>
+        var result = document.querySelector("#result");
+        const err = (code = null) => {
+            let str = "Error: ";
+            if (!code) {
+                return str + "No server found at IP (400)";
+            }
+            if (code == "ECONNRESET") {
+                return str + `Connection Reset`;
+            }
+            if (code == "ENOTFOUND") {
+                return str + "No server found at IP";
+            }
+            if (code == "ECONNREFUSED") {
+                return str + "Server Connection Refused. (check port)";
+            }
+
+        }
+        const cfxForm = document.getElementById("fetch-cfx");
+        const errLabel = document.getElementById("errLabel");
+        const ip = document.getElementById("ip-address-input");
+        const cfx = document.getElementById("cfx-input");
+        const wrapper = document.getElementById("svinfo");
+        const splash = document.getElementById("img-splash-banner");
+        const icon = document.getElementById("img-profile");
+        const title = document.getElementById("sv-title");
+        const sub = document.getElementById("sv-sub");
+        const desc = document.getElementById("sv-desc");
+        const vars = document.getElementById("sv-vars");
+        const btnContinue = document.getElementById("submit-ip");
+        const urlFormInput = document.getElementById("url");
+        const svDataFormInput = document.getElementById("svData");
+
+
+        cfxForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            errLabel.innerHTML = "";
+            doUpdate();
+        });
+        document.getElementById("tracked").addEventListener("click", () => {
+            doUpdate();
+        });
+        const doUpdate = async () => {
+            const EndPoint = cleanupEndPoint(cfx.value);
+            cfx.value = EndPoint;
+            const svData = await fetch(`/bin/fiveM/server/cfxFetch/${EndPoint}`).then(res => res.json());
+            updateSvInfo(svData, EndPoint);
+        }
+        const updateSvInfo = (svInfo, cfx) => {
+            //console.log(svInfo.Data.vars.banner_detail)
+            let cleanTitle = cleanupTitle(svInfo.Data.vars.sv_projectName);
+            let tracked = toBool(document.getElementById("tracked").checked);
+            let assign = {
+                Flags: {
+                    tracked,
+                }
+            }
+            Object.assign(svInfo, assign);
+            //svInfo.Flags.track = toBool(document.getElementById("tracked").checked);
+            svInfo.Data.vars.sv_projectName = cleanTitle;
+            splash.src = svInfo.Data.vars.banner_detail;
+            title.innerHTML = svInfo.Data.vars.sv_projectName;
+            desc.innerHTML = svInfo.Data.vars.sv_projectDesc;
+            vars.innerHTML = JSON.stringify(svInfo.Data.vars, null, 4);
+            wrapper.classList.remove("visually-hidden");
+            btnContinue.classList.remove("disabled");
+            delete svInfo.Data.players;
+            //console.log(svInfo);
+            urlFormInput.value = cfx;
+            svDataFormInput.value = JSON.stringify(svInfo);
+        }
+        const cleanupEndPoint = (orig) => {
+            return orig.replaceAll("cfx.re/join/", "");
+        }
+        const cleanupTitle = (original) => {
+            let t1 = original.replaceAll("^0", "");
+            let t2 = t1.replaceAll("^1", "");
+            let t3 = t2.replaceAll("^2", "");
+            let t4 = t3.replaceAll("^3", "");
+            let t5 = t4.replaceAll("^4", "");
+            let t6 = t5.replaceAll("^5", "");
+            let t7 = t6.replaceAll("^6", "");
+            let t8 = t7.replaceAll("^7", "");
+            let t9 = t8.replaceAll("^8", "");
+            let t10 = t9.replaceAll("^9", "");
+            return t10;
+        }
+
+        function toBool(val) { // Checkbox True/False <-- because checkboxes return "on" if true...
+            if (val) {
+                return val;
+            } else {
+                return false;
+            }
+        }
+    </script>
+</body>
+
+</html>

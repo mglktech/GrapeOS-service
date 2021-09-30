@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<%-include ("../partials/head.ejs") %>
+
+<body>
+    <%-include ("../partials/nav.ejs");%>
+    <main class="page">
+        <div class="container">
+            <div class="heading">
+                <h2>Add Article</h2>
+            </div>
+            <form action="/articles/new" method="POST" style="max-width:40em; margin:0 auto;">
+                <div class="mb-3">
+                    <label class="form-label">Header Image URL</label>
+                    <input class="form-control" type="text" id="headerImg" name="headerImg">
+                    <img id="headerImgDisplay" class="img-fluid"src="">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <input class="form-control" type="text" id="title" name="title">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Subtitle</label>
+                    <input class="form-control" type="text" id="subtitle" name="subtitle">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Markdown</label>
+                    <textarea class="form-control" id="markdown"rows="7" name="markdown"></textarea>
+                </div>
+                <div class="mb-3">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6 button">
+                            <button class="btn btn-dark d-block w-100" type="submit">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script>
+        const headerImg = document.getElementById("headerImg");
+        const headerImgDisplay = document.getElementById("headerImgDisplay");
+        headerImg.addEventListener("change", (e) => {
+            headerImgDisplay.src = headerImg.value;
+        })
+    </script>
+    <%-include ("../partials/foot.ejs") %>
+    <%-include ("../partials/scripts.ejs")%>
+</body>
+
+</html>

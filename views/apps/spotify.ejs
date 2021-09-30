@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Code:400,500,700">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,500,700">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <title>LastFM Spotify Scrobbler</title>
+    
+</head>
+<body>
+  <div class="row g-0 align-items-center bg-dark min-vh-100">
+    <div class="col-4 p-1"><img class="img-fluid" src="\img\forever_alone_music_note" id="trackart" alt="Album Art"></div>
+    <div class="col p-1">
+        <div class="d-flex flex-column"><span class="text-secondary">mglk is playing:</span><a id="tracktitle" class="text-white h3" href="" target="_blank" style="text-decoration: none;font-weight: bold;">...</a>
+            <div><span class="text-secondary">By:&nbsp;</span><a id="trackartist" href="" target="_blank">...</a></div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+<script>
+const trackArt = document.querySelector("#trackart");
+const trackTitle = document.querySelector("#tracktitle");
+const trackArtist = document.querySelector("#trackartist");
+const getSetTrack = async () => {
+  let trackData = await fetch('/apps/spotify/data').then(res => res.json());
+  //let dataAsJson = await trackData.json();
+  //console.log(trackData);
+  trackArt.src=trackData.image[3]["#text"];
+  trackTitle.innerHTML = trackData.name;
+  trackTitle.href=trackData.url;
+  trackArtist.innerHTML = trackData.artist["#text"];
+  trackArtist.href=trackData.url;
+}
+getSetTrack();
+setInterval(getSetTrack, 10 * 1000); 
+</script>
+</body>
+</html>
