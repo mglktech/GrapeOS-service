@@ -8,7 +8,6 @@ const CONCURRENCY = process.env.WEB_CONCURRENCY || 1;
 const MongoStore = require("connect-mongo");
 const passport = require("passport");
 const logger = require("emberdyn-logger");
-
 require("ejs");
 require("./config/db");
 require("./config/strategies/discordStrategy");
