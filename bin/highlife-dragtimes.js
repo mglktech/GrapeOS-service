@@ -1,4 +1,4 @@
-const client = require("../config/api/discord");
+const client = require("../services/discord");
 const fetchAll = require("discord-fetch-all");
 const model = require("../models/hl-dragtime-model");
 const logger = require("emberdyn-logger");
@@ -13,13 +13,13 @@ async function SynchronizeAllMessages(channel) {
 	});
 	for (message of allMessages) {
 		const dragTime = parseMessage(message);
-		new model(dragTime).save().then((result) => {
-			logger.info(
-				"[HL_DRAGTIME]: Sync : New Drag Time logged for " + dragTime.rp_name
-			);
-		});
-		//console.log(dragTime);
-		//console.log(ar);
+		if (!(await model.exists({ messageID: dragTime.messageID }))) {
+			new model(dragTime).save().then((result) => {
+				logger.info(
+					"[HL_DRAGTIME]: Sync : New Drag Time logged for " + dragTime.rp_name
+				);
+			});
+		}
 	}
 }
 
