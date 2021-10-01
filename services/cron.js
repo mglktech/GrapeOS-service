@@ -33,7 +33,7 @@ const createTask = (task) => {
 		manager.add(task._id.toString(), task.exp, function () {
 			controller.pingFiveMServers();
 		});
-		console.log(`CRON Task ${task.name} has been created. (pingFiveMServers)`);
+		console.log(`CRON Task ${task.name} has been created. (${task.cmd})`);
 	}
 };
 

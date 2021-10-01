@@ -38,12 +38,11 @@ model.getAllOnline = (server) => {
 		.sort({ sv_id: "desc" });
 };
 
-model.finish = (_id) => {
-	const now = Date.now();
+model.finish = (_id, offlineAt = Date.now()) => {
 	model
 		.findByIdAndUpdate(_id, {
 			online: false,
-			offlineAt: now,
+			offlineAt,
 		})
 		.exec();
 	// .populate("player")

@@ -6,60 +6,102 @@ const maxRetries = process.env.maxRetries || 3;
 
 const pingFiveMServers = () => {
 	FiveMServerModel.find({ "Flags.tracked": true }).then((servers) => {
-		servers.forEach((server) => {
-			pingFiveMServer(server._id);
+		servers.forEach(async (server) => {
+			if (typeof server.Flags.ready == "undefined") {
+				FiveMServerModel.findByIdAndUpdate(server._id, {
+					"Flags.ready": true,
+				}).exec();
+				return;
+			}
+			if (server.Flags.ready === false) {
+				console.log(`[${server.EndPoint}] - Ping Failed, server not ready.`);
+				return;
+			}
+			await FiveMServerModel.findByIdAndUpdate(server._id, {
+				"Flags.ready": false,
+			}).exec();
+			await pingFiveMServer(server);
+			await FiveMServerModel.findByIdAndUpdate(server._id, {
+				"Flags.ready": true,
+			}).exec();
 		});
 	});
 };
 
-const pingFiveMServer = async (serverId) => {
-	let a = Date.now();
-	const FiveMServer = await FiveMServerModel.getById(serverId);
+const pingFiveMServer = async (FiveMServer) => {
+	let timers = {
+		init: Date.now(),
+		serviceStart: 0,
+		serviceEnd: 0,
+		end: 0,
+	};
+
 	if (!FiveMServer) {
-		console.log(`Error: No Server found for _id:${serverId}`);
+		console.log(`Error: No Server found for _id:${FiveMServer._id}`);
 		return;
 	}
+
+	let lastSeen = FiveMServer.Flags.lastSeen;
 	const srv = new FiveMService.Server(FiveMServer.EndPoint);
-	let a1 = Date.now();
-	const serverInfo = await srv.getCfx().catch((err) => {
-		let b = Date.now();
-		if (err.code) {
+	timers.serviceStart = Date.now();
+	let serverState;
+	const serverInfo = await srv
+		.getCfx()
+		.then((sv) => {
+			serverState = "200";
+			timers.serviceEnd = Date.now();
+			return sv;
+		})
+		.catch((err) => {
+			timers.serviceEnd = Date.now();
+			if (err.code) {
+				serverState = err.code;
+				console.log(
+					`[${FiveMServer.EndPoint}][${
+						timers.serviceEnd - timers.serviceStart
+					}ms] [${err.code}] [${FiveMServer.Data.vars.get("sv_projectName")}]`
+				);
+				return;
+			}
+			serverState = "404";
 			console.log(
-				`[${FiveMServer.EndPoint}][${b - a1}ms] [${
-					err.code
-				}] [${FiveMServer.Data.vars.get("sv_projectName")}]`
+				`[${FiveMServer.EndPoint}][${
+					timers.serviceEnd - timers.serviceStart
+				}ms] [${err}] [${FiveMServer.Data.vars.get("sv_projectName")}]`
 			);
-			return;
-		}
-		console.log(
-			`[${FiveMServer.EndPoint}][${
-				b - a1
-			}ms] [${err}] [${FiveMServer.Data.vars.get("sv_projectName")}]`
-		);
-		return;
-	});
+		});
+	// console.log(
+	// 	`[${serverInfo}][${FiveMServer.EndPoint}][${
+	// 		timers.serviceEnd - timers.serviceStart
+	// 	}ms] [${serverState}] [${FiveMServer.Data.vars.get("sv_projectName")}]`
+	// );
 	if (!serverInfo) {
-		return;
+		FiveMServerModel.findByIdAndUpdate(FiveMServer._id, {
+			"Flags.state": serverState,
+		}).exec();
+		return; // Don't bother updating playerinfo/activities, we have no data!
 	}
-	let b1 = Date.now();
-	//console.log(serverInfo);
-	//syncServerInfo(FiveMServer, serverInfo);
-	const playerInfo = scrubUp(serverInfo.Data.players, serverId);
+
+	const playerInfo = scrubUp(serverInfo.Data.players, FiveMServer._id);
+	let serverTelemetry = {
+		newPlayers: 0,
+		loggedIn: 0,
+		loggedOut: 0,
+	};
+	/*
+	Sychronizing players and activities requires a couple of for loops.
+	One to check online players against online activities,
+	One to check online activities against online players.
+	New players may come online and require an activity to be produced,
+	Old players may go offline and require an activity to be completed.
+	*/
+	let playerModels = await FiveMPlayerModel.find({
+		server: FiveMServer._id,
+	});
 	const dbActivities = await FiveMActivityModel.find({
-		server: serverId,
+		server: FiveMServer._id,
 		online: true,
 	}).populate("player");
-	//console.log(dbActivities);
-	//console.log(playerInfo);
-
-	let playerModels = await FiveMPlayerModel.find({
-		server: serverId,
-		online: true,
-	});
-	let initPing = b1 - a1;
-	let newPlayers = 0;
-	let newActivities = 0;
-	let oldActivities = 0;
 	for (let player of playerInfo) {
 		//const p = createPlayer(player);
 		let playerMatch = playerModels.some((ply) => {
@@ -67,34 +109,26 @@ const pingFiveMServer = async (serverId) => {
 				ply.identifiers.get("license") == player.identifiers.get("license")
 			);
 		});
+		if (!playerMatch) {
+			serverTelemetry.newPlayers++;
+			await new FiveMPlayerModel(player).save();
+		}
 		let activityMatch = dbActivities.some((activity) => {
 			return activity.sv_id == player.id;
 		});
-		if (!playerMatch) {
-			newPlayers++;
-			//console.log(`New FiveM Player Discovered: ${player.name}`);
-			await new FiveMPlayerModel(player).save();
-		}
 		if (!activityMatch) {
-			newActivities++;
 			let thisPlayer = await FiveMPlayerModel.findOne({
 				"identifiers.license": player.identifiers.get("license"),
 			});
+			serverTelemetry.loggedIn++;
 			FiveMActivityModel.create({
-				server: serverId,
+				server: FiveMServer._id,
 				player: thisPlayer._id,
 				sv_id: player.id,
 			});
-			FiveMPlayerModel.findByIdAndUpdate(thisPlayer._id, {
-				online: true,
-			}).exec();
-			// console.log(
-			// 	`${thisPlayer.name} has logged in to ${FiveMServer.Data.vars.get(
-			// 		"sv_projectName"
-			// 	)}`
-			// );
 		}
 	}
+
 	for (let activity of dbActivities) {
 		let match = playerInfo.some((ply) => {
 			return (
@@ -102,29 +136,29 @@ const pingFiveMServer = async (serverId) => {
 					activity.player.identifiers.get("license") && ply.id == activity.sv_id
 			);
 		});
-		//console.log(match);
 		if (!match) {
-			oldActivities++;
-			//console.log(activity.player._id);
-			const now = Date.now();
-			FiveMActivityModel.findByIdAndUpdate(activity._id, {
-				online: false,
-				offlineAt: now,
-			}).exec();
-			FiveMPlayerModel.findByIdAndUpdate(activity.player._id, {
-				online: false,
-			}).exec();
+			serverTelemetry.loggedOut++;
+			if (FiveMServer.Flags.state != "200") {
+				FiveMActivityModel.finish(activity._id, FiveMServer.Flags.lastSeen);
+			} else {
+				FiveMActivityModel.finish(activity._id);
+			}
 		}
 	}
-	let b = Date.now();
+
+	timers.end = Date.now();
 	console.log(
-		`[${FiveMServer.EndPoint}][${initPing}ms][t:${
-			playerInfo.length
-		} new:${newPlayers} in:${newActivities} out:${oldActivities}] => ${
-			b - a
+		`[${FiveMServer.EndPoint}] [${
+			timers.serviceEnd - timers.serviceStart
+		}ms] [t:${playerInfo.length} new:${serverTelemetry.newPlayers} in:${
+			serverTelemetry.loggedIn
+		} out:${serverTelemetry.loggedOut}] => ${
+			timers.end - timers.init
 		}ms [${FiveMServer.Data.vars.get("sv_projectName")}]  `
 	);
 };
+
+async function syncActivities(activities, svInfo, playerInfo) {}
 
 function scrubUp(playerData, serverId) {
 	let rtn = [];
