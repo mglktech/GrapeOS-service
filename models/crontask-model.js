@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const funcs = require("../bin/funcs/mongoose-funcs");
-const activity = require("./activity-model");
+//const activity = require("./activity-model");
 const Schema = mongoose.Schema;
 const modelName = "Crontask";
 const mySchema = new Schema(
@@ -32,7 +32,7 @@ model.toggle = async (_id) => {
 	if (cron) {
 		cron.enabled = !cron.enabled;
 		if (cron.enabled == false) {
-			activity.finishAll(cron.data.get("id"));
+			//activity.finishAll(cron.data.get("id"));
 		}
 		cron.save();
 	}

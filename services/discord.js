@@ -6,7 +6,6 @@ const client = new Discord.Client({
 	intents: "GUILD_MESSAGES",
 });
 const token = process.env.discord_token;
-const logger = require("emberdyn-logger");
 client.login(token);
 client.fetchGuild = (guildID) => {
 	return client.guilds
@@ -98,7 +97,7 @@ client.fetchRoles = async (guild_id) => {
 };
 
 const HandleErrors = (err, src = "services/discord.js") => {
-	logger.warn(`[${src}]: ${err}`);
+	console.log(`[${src}]: ${err}`);
 };
 
 client.on("ready", () => {

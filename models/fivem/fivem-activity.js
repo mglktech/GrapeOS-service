@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const logger = require("emberdyn-logger");
+//const logger = require("emberdyn-logger");
 const Schema = mongoose.Schema;
 
 const modelName = "fivem-activity";

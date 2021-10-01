@@ -154,16 +154,11 @@ const MapIdentifiers = (identifiers) => {
 	return new Map(map);
 };
 
-function doLog(service, text) {
-	let logTxt = `[${service}] -> ${text}`;
-	console.log(logTxt);
-}
+// async function timeIt(cmd, svName, func) {
+// 	let a = Date.now();
+// 	await func;
+// 	let b = Date.now();
+// 	console.log(`[CRON timeIt] [${cmd} - ${svName}] took ${b - a}ms to complete`);
+// }
 
-async function timeIt(cmd, svName, func) {
-	let a = Date.now();
-	await func;
-	let b = Date.now();
-	console.log(`[CRON timeIt] [${cmd} - ${svName}] took ${b - a}ms to complete`);
-}
-
-module.exports = { pingFiveMServer, pingFiveMServers };
+module.exports = { pingFiveMServers };

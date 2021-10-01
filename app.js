@@ -3,18 +3,25 @@ const express = require("express");
 const path = require("path");
 const morgan = require("morgan")(process.env.morgan_logLevel);
 const PORT = process.env.PORT || 5001;
-const CONCURRENCY = process.env.WEB_CONCURRENCY || 1;
-//const session = require("express-session");
-const MongoStore = require("connect-mongo");
-const passport = require("passport");
-const logger = require("emberdyn-logger");
-require("ejs");
-require("./config/db");
-//require("./config/strategies/discordStrategy");
-//require("./services/discord");
+const mongoose = require("mongoose");
+const conn = process.env.DB_STRING;
+// Connect to DB on boot
+mongoose
+	.connect(conn, {
+		useUnifiedTopology: true,
+		useNewUrlParser: true,
+	})
+	.then(() => {
+		console.log(`[MONGOOSE]: Database Connected.`);
+		mongoose.set("useFindAndModify", false);
+	})
+	.catch((err) => {
+		console.log(`Database Error: ${err}`);
+	});
 require("./bin/highlife-dragtimes");
-require("./config/cron.js");
-require("./config/newdbconfig").setup();
+require("./services/cron.js");
+
+//require("ejs");
 
 let app = express();
 
@@ -23,4 +30,4 @@ app.use((err, req, res, next) => {
 	res.status(404);
 });
 
-app.listen(PORT, () => logger.system(`Listening on ${PORT}`));
+app.listen(PORT, () => console.log(`Listening on ${PORT}`));

@@ -1,7 +1,7 @@
 const client = require("../services/discord");
 const fetchAll = require("discord-fetch-all");
 const model = require("../models/hl-dragtime-model");
-const logger = require("emberdyn-logger");
+//const logger = require("emberdyn-logger");
 const text_live_dragtimes = "858368582759743518";
 
 async function SynchronizeAllMessages(channel) {
@@ -15,7 +15,7 @@ async function SynchronizeAllMessages(channel) {
 		const dragTime = parseMessage(message);
 		if (!(await model.exists({ messageID: dragTime.messageID }))) {
 			new model(dragTime).save().then((result) => {
-				logger.info(
+				console.log(
 					"[HL_DRAGTIME]: Sync : New Drag Time logged for " + dragTime.rp_name
 				);
 			});
@@ -28,14 +28,14 @@ client.on("ready", () => {
 });
 
 const SyncHighlifeDragTimes = async () => {
-	logger.info("[HL_DRAGTIME]: Syncing Highlife Drag Times...");
+	console.log("[HL_DRAGTIME]: Syncing Highlife Drag Times...");
 	const channel = await client.channels.fetch(text_live_dragtimes);
 	//console.log(channel);
 	// Synchronization Check can be done using channel.lastMessageID
 	if (!(await model.exists({ messageID: channel.lastMessageID }))) {
 		await SynchronizeAllMessages(channel);
 	}
-	logger.info("[HL_DRAGTIME]: Sync Complete.");
+	console.log("[HL_DRAGTIME]: Sync Complete.");
 };
 
 client.on("message", (message) => {
@@ -46,7 +46,7 @@ client.on("message", (message) => {
 		let dragTime = parseMessage(message);
 		const newDragTime = new model(dragTime);
 		newDragTime.save().then(() => {
-			logger.info(
+			console.log(
 				"[HL_DRAGTIME]: New Drag Time logged for " + dragTime.rp_name
 			);
 		});
