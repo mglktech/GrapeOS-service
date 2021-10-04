@@ -28,8 +28,9 @@ const syncTaskToEnabledFlag = (task) => {
 	}
 };
 
-const createTask = (task) => {
+const createTask = async (task) => {
 	if (task.cmd == "pingFiveMServers") {
+		controller.resetReadyFlags();
 		manager.add(task._id.toString(), task.exp, function () {
 			controller.pingFiveMServers();
 		});
