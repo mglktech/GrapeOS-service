@@ -8,10 +8,12 @@ const mySchema = new Schema(
 		server: {
 			type: Schema.ObjectId,
 			ref: "fivem-server",
+			required: true,
 		},
 		player: {
 			type: Schema.ObjectId,
 			ref: "fivem-player",
+			required: true,
 		},
 		onlineAt: Number,
 		offlineAt: Number,

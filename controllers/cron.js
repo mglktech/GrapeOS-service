@@ -4,6 +4,13 @@ const FiveMActivityModel = require("../models/fivem/fivem-activity");
 const FiveMService = require("../services/fiveM");
 const maxRetries = process.env.maxRetries || 3;
 
+const resetReadyFlags = async () => {
+	let sv_unreadys = await FiveMServerModel.find({ "Flags.ready": false });
+	for (sv of sv_unreadys) {
+		FiveMServerModel.findByIdAndUpdate(sv._id, { "Flags.ready": true }).exec();
+	}
+};
+
 const pingFiveMServers = () => {
 	FiveMServerModel.find({ "Flags.tracked": true }).then((servers) => {
 		servers.forEach(async (server) => {
@@ -81,12 +88,18 @@ const pingFiveMServer = async (FiveMServer) => {
 		}).exec();
 		return; // Don't bother updating playerinfo/activities, we have no data!
 	}
+	FiveMServerModel.findByIdAndUpdate(FiveMServer._id, {
+		"Flags.state": serverState,
+		"Flags.lastSeen": timers.serviceEnd,
+	}).exec();
 
 	const playerInfo = scrubUp(serverInfo.Data.players, FiveMServer._id);
 	let serverTelemetry = {
 		newPlayers: 0,
 		loggedIn: 0,
 		loggedOut: 0,
+		activitiesTimeStart: 0,
+		activitiesTimeEnd: 0,
 	};
 	/*
 	Sychronizing players and activities requires a couple of for loops.
@@ -95,22 +108,41 @@ const pingFiveMServer = async (FiveMServer) => {
 	New players may come online and require an activity to be produced,
 	Old players may go offline and require an activity to be completed.
 	*/
-	let playerModels = await FiveMPlayerModel.find({
-		server: FiveMServer._id,
-	});
+	// let playerModels = await FiveMPlayerModel.find({
+	// 	server: FiveMServer._id,
+	// });
+
 	const dbActivities = await FiveMActivityModel.find({
 		server: FiveMServer._id,
 		online: true,
-	}).populate("player");
+	})
+		.lean()
+		.populate({
+			path: "player",
+			select: "identifiers",
+		});
+	//console.log(dbActivities);
+	serverTelemetry.activitiesTimeStart = Date.now();
+	let aggLicenses = [];
 	for (let player of playerInfo) {
+		aggLicenses.push(player.identifiers.get("license"));
+	}
+	let playerModels = await FiveMPlayerModel.find({
+		"identifiers.license": aggLicenses,
+	}).lean();
+	//console.log(playerModels);
+	for (let player of playerInfo) {
+		let license = player.identifiers.get("license");
 		//const p = createPlayer(player);
+		// let thisPlayer = await FiveMPlayerModel.findPlayerByLicense(
+		// 	player.identifiers.get("license")
+		// );
 		let playerMatch = playerModels.some((ply) => {
-			return (
-				ply.identifiers.get("license") == player.identifiers.get("license")
-			);
+			return ply.identifiers.license == player.identifiers.get("license");
 		});
 		if (!playerMatch) {
 			serverTelemetry.newPlayers++;
+			//console.log("New player added.");
 			await new FiveMPlayerModel(player).save();
 		}
 		let activityMatch = dbActivities.some((activity) => {
@@ -118,7 +150,7 @@ const pingFiveMServer = async (FiveMServer) => {
 		});
 		if (!activityMatch) {
 			let thisPlayer = await FiveMPlayerModel.findOne({
-				"identifiers.license": player.identifiers.get("license"),
+				"identifiers.license": license,
 			});
 			serverTelemetry.loggedIn++;
 			FiveMActivityModel.create({
@@ -128,12 +160,13 @@ const pingFiveMServer = async (FiveMServer) => {
 			});
 		}
 	}
+	serverTelemetry.activitiesTimeEnd = Date.now();
 
 	for (let activity of dbActivities) {
 		let match = playerInfo.some((ply) => {
 			return (
-				ply.identifiers.get("license") ==
-					activity.player.identifiers.get("license") && ply.id == activity.sv_id
+				ply.identifiers.get("license") == activity.player.identifiers.license &&
+				ply.id == activity.sv_id
 			);
 		});
 		if (!match) {
@@ -148,9 +181,9 @@ const pingFiveMServer = async (FiveMServer) => {
 
 	timers.end = Date.now();
 	console.log(
-		`[${FiveMServer.EndPoint}] [${
-			timers.serviceEnd - timers.serviceStart
-		}ms] [t:${playerInfo.length} new:${serverTelemetry.newPlayers} in:${
+		`[${FiveMServer.EndPoint}][${timers.serviceEnd - timers.serviceStart}ms][${
+			serverTelemetry.activitiesTimeEnd - serverTelemetry.activitiesTimeStart
+		}ms][t:${playerInfo.length} new:${serverTelemetry.newPlayers} in:${
 			serverTelemetry.loggedIn
 		} out:${serverTelemetry.loggedOut}] => ${
 			timers.end - timers.init
@@ -195,4 +228,4 @@ const MapIdentifiers = (identifiers) => {
 // 	console.log(`[CRON timeIt] [${cmd} - ${svName}] took ${b - a}ms to complete`);
 // }
 
-module.exports = { pingFiveMServers };
+module.exports = { pingFiveMServers, resetReadyFlags };
