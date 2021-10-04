@@ -19,7 +19,7 @@ const mySchema = new Schema({
 const model = mongoose.model(modelName, mySchema);
 
 // assign model constants
-model.create = () => {};
+
 model.findPlayer = async (playerInfo) => {
 	return model.findOneAndUpdate({ name: playerInfo.name }, playerInfo, {
 		new: true,
