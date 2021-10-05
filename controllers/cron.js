@@ -115,23 +115,18 @@ const pingFiveMServer = async (FiveMServer) => {
 	const dbActivities = await FiveMActivityModel.find({
 		server: FiveMServer._id,
 		online: true,
-	})
-		.lean()
-		.populate({
-			path: "player",
-			select: "identifiers",
-		});
+	}).populate("player");
 	//console.log(dbActivities);
 	serverTelemetry.activitiesTimeStart = Date.now();
 	let aggLicenses = [];
-	for (let player of playerInfo) {
+	for await (let player of playerInfo) {
 		aggLicenses.push(player.identifiers.get("license"));
 	}
 	let playerModels = await FiveMPlayerModel.find({
 		"identifiers.license": aggLicenses,
 	}).lean();
 	//console.log(playerModels);
-	for (let player of playerInfo) {
+	for await (let player of playerInfo) {
 		let license = player.identifiers.get("license");
 		//const p = createPlayer(player);
 		// let thisPlayer = await FiveMPlayerModel.findPlayerByLicense(
@@ -162,13 +157,14 @@ const pingFiveMServer = async (FiveMServer) => {
 	}
 	serverTelemetry.activitiesTimeEnd = Date.now();
 
-	for (let activity of dbActivities) {
+	for await (let activity of dbActivities) {
 		let match = playerInfo.some((ply) => {
 			return (
-				ply.identifiers.get("license") == activity.player.identifiers.license &&
-				ply.id == activity.sv_id
+				ply.identifiers.get("license") ==
+					activity.player.identifiers.get("license") && ply.id == activity.sv_id
 			);
 		});
+		//console.log(match);
 		if (!match) {
 			serverTelemetry.loggedOut++;
 			if (FiveMServer.Flags.state != "200") {

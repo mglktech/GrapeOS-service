@@ -21,6 +21,7 @@ class Server {
 				)
 				.then(function (body) {
 					send(body.data);
+					//err("Error: forced error");
 				})
 				.catch(function (error) {
 					err(error);
