@@ -21,7 +21,7 @@ class Server {
 				)
 				.then(function (body) {
 					send(body.data);
-					//err("Error: forced error");
+					//err("Error: forced error"); // For Debugging servers with bad connections
 				})
 				.catch(function (error) {
 					err(error);
