@@ -17,6 +17,7 @@ const mySchema = new Schema({
 		tracked: Boolean,
 		public: Boolean,
 		lastSeen: Number,
+		debugMode: Boolean,
 		state: String,
 		ready: {
 			type: Boolean,
@@ -65,7 +66,7 @@ model.getById = (id) => {
 	return model.findById(id);
 };
 model.fetchByCfx = (cfxCode) => {
-	return model.findOne({ EndPoint: cfxCode });
+	return model.findOne({ EndPoint: cfxCode }).lean();
 };
 
 model.create = (item) => {
