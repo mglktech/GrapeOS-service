@@ -178,6 +178,7 @@ function EnsureServers(server, player) {
 	if (!exists) {
 		FiveMPlayerModel.findByIdAndUpdate(player._id, {
 			$push: { servers: server },
+			$unset: { server: "" },
 		}).exec();
 		//console.log(`${player.name} has been discovered on another server`);
 	}
