@@ -166,7 +166,7 @@ async function EnsurePlayers_newActivities(server, playerInfo, dbActivities) {
 	}
 	return { newPlayers, loggedIn };
 }
-function EnsureServers(server, player) {
+function EnsureServers(server, player = []) {
 	const exists = player.servers.some(
 		(sv) => sv.toString() == server.toString()
 	);

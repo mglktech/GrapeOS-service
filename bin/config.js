@@ -5,7 +5,7 @@ module.exports.setup = async () => {
 	console.log(`Setup Started.`);
 	//await users.setup();
 	//await files.setup(); // File/folder structure needs to be ensured on init in case any of the defaults have changed.
-	await updatePlayerModels();
+	//await updatePlayerModels();
 	console.log(`Setup Complete.`);
 };
 
