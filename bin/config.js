@@ -14,10 +14,12 @@ async function updatePlayerModels() {
 		for (player of res) {
 			// so I don't have to clear activity data this time
 			if (typeof player.servers == "undefined") {
-				playerModel.findByIdAndUpdate(player._id, {
-					$unset: { server: "" },
-					$set: { servers: [] },
-				});
+				playerModel
+					.findByIdAndUpdate(player._id, {
+						$unset: { server: "" },
+						$set: { servers: [] },
+					})
+					.exec();
 				//console.log(`${player.name} updated`);
 			}
 		}
