@@ -166,10 +166,13 @@ async function EnsurePlayers_newActivities(server, playerInfo, dbActivities) {
 	}
 	return { newPlayers, loggedIn };
 }
-function EnsureServers(server, player = { servers: [] }) {
-	const exists = player.servers.some(
-		(sv) => sv.toString() == server.toString()
-	);
+function EnsureServers(server, player) {
+	let exists;
+	try {
+		exists = player.servers.some((sv) => sv.toString() == server.toString());
+	} catch {
+		exists = false;
+	}
 	//console.log(player.name);
 	//console.log(exists);
 	if (!exists) {
