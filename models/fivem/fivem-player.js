@@ -9,7 +9,7 @@ const mySchema = new Schema({
 	//id: Number,
 	identifiers: { type: Map, of: String },
 	name: String,
-	server: { type: Schema.Types.ObjectId, ref: "fivem-server" },
+	servers: [{ type: Schema.Types.ObjectId, ref: "fivem-server" }],
 	// online: {
 	// 	type: Boolean,
 	// 	default: true,
@@ -20,11 +20,11 @@ const model = mongoose.model(modelName, mySchema);
 
 // assign model constants
 
-model.findPlayer = async (playerInfo) => {
-	return model.findOneAndUpdate({ name: playerInfo.name }, playerInfo, {
-		new: true,
-		upsert: true,
-	});
-};
+// model.findPlayer = async (playerInfo) => {
+// 	return model.findOneAndUpdate({ name: playerInfo.name }, playerInfo, {
+// 		new: true,
+// 		upsert: true,
+// 	});
+// };
 
 module.exports = model;

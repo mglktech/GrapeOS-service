@@ -152,32 +152,32 @@ async function EnsurePlayers_newActivities(server, playerInfo, dbActivities) {
 		);
 		if (!player) {
 			newPlayers++;
-			//console.log("New player added.");
-			// player = await FiveMPlayerModel.findOneAndUpdate(
-			// 	{
-			// 		"identifiers.license": pInfo.identifiers.get("license"),
-			// 	},
-			// 	pInfo,
-			// 	{
-			// 		upsert: true,
-			// 		new:true,
-			// 	}
-			// );
 			player = await new FiveMPlayerModel({
 				identifiers: pInfo.identifiers,
 				name: pInfo.name,
-				//server: pInfo.server,
+				servers: [server],
 			}).save();
 		}
-		if (!player) {
-			//console.log("PLAYER NOT FOUND");
-		}
+		EnsureServers(server, player);
 		let activityMatch = EnsureActivity(server, pInfo, dbActivities, player._id);
 		if (activityMatch == false) {
 			loggedIn++;
 		}
 	}
 	return { newPlayers, loggedIn };
+}
+function EnsureServers(server, player) {
+	const exists = player.servers.some(
+		(sv) => sv.toString() == server.toString()
+	);
+	//console.log(player.name);
+	//console.log(exists);
+	if (!exists) {
+		FiveMPlayerModel.findByIdAndUpdate(player._id, {
+			$push: { servers: server },
+		}).exec();
+		console.log(`${player.name} has been discovered on another server`);
+	}
 }
 function EnsureActivity(server, pInfo, dbActivities, player) {
 	let license = pInfo.identifiers.license;
