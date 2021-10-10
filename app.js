@@ -18,6 +18,7 @@ mongoose
 	.catch((err) => {
 		console.log(`Database Error: ${err}`);
 	});
+require("./bin/config").setup();
 require("./bin/highlife-dragtimes");
 require("./services/cron.js");
 
