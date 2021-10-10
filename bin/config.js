@@ -18,7 +18,7 @@ async function updatePlayerModels() {
 					$unset: { server: "" },
 					$set: { servers: [] },
 				});
-				console.log(`${player.name} updated`);
+				//console.log(`${player.name} updated`);
 			}
 		}
 		console.log("PlayerModels Updated");
