@@ -10,21 +10,19 @@ module.exports.setup = async () => {
 };
 
 async function updatePlayerModels() {
-	await playerModel.find({}).then((res) => {
-		let count = 0;
-		for (player of res) {
-			// so I don't have to clear activity data this time
-			if (typeof player.server != "undefined") {
-				count++;
-				playerModel
-					.findByIdAndUpdate(player._id, {
-						$unset: { server: "" },
-						$set: { servers: [] },
-					})
-					.exec();
-				//console.log(`${player.name} updated`);
-			}
-		}
-		console.log(`${count} PlayerModels Updated`);
-	});
+	console.log("Updating Player Models");
+	const players = await playerModel.find({});
+	let count = 0;
+	console.log(`Processing ${players.length} records...`);
+	for (let player of players) {
+		// so I don't have to clear activity data this time
+		count++;
+		await playerModel
+			.findByIdAndUpdate(player._id, {
+				$unset: { server: "" },
+			})
+			.exec();
+		console.log(`${player.name} updated`);
+	}
+	console.log(`${count} PlayerModels Updated`);
 }
