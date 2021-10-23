@@ -1,6 +1,6 @@
 //const users = require("../models/user-model");
 //const files = require("../models/file-model");
-const playerModel = require("../models/fivem/fivem-player.js");
+const playerModel = require('../models/fivem/fivem-player.js');
 module.exports.setup = async () => {
 	console.log(`Setup Started.`);
 	//await users.setup();
@@ -10,7 +10,7 @@ module.exports.setup = async () => {
 };
 
 async function updatePlayerModels() {
-	console.log("Updating Player Models");
+	console.log('Updating Player Models');
 	const players = await playerModel.find({});
 	let count = 0;
 	console.log(`Processing ${players.length} records...`);
@@ -19,7 +19,7 @@ async function updatePlayerModels() {
 		count++;
 		await playerModel
 			.findByIdAndUpdate(player._id, {
-				$unset: { server: "" },
+				$unset: { server: '' },
 			})
 			.exec();
 		console.log(`${player.name} updated`);
